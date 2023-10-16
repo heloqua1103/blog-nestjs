@@ -8,7 +8,10 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
-    TypeOrmModule.forRoot(dataSourceOptions), UserModule, AuthModule, ConfigModule.forRoot()
+    TypeOrmModule.forRoot(dataSourceOptions),
+    UserModule,
+    AuthModule,
+    ConfigModule.forRoot()
   ],
   controllers: [AppController],
   providers: [AppService],
