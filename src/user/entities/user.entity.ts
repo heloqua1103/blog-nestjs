@@ -18,6 +18,9 @@ export class User {
     email: string;
 
     @Column({ nullable: true, default: null })
+    avatar: string;
+
+    @Column({ nullable: true, default: null })
     refresh_token: string;
 
     @Column({ default: 1 })
