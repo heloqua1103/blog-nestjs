@@ -30,14 +30,22 @@ export class PostService {
         const page = Number(query.page) || 1;
         const search = query.search || '';
         const skip = (page - 1) * items_per_page;
+        const category = Number(query.category) || null;
 
         const [res, total] = await this.postRepository.findAndCount({
-            where: [{ title: Like('%' + search + '%') }, { description: Like('%' + search + '%') }],
+            where: [
+                { title: Like('%' + search + '%'), category: { id: category } },
+                {
+                    description: Like('%' + search + '%'),
+                    category: { id: category }
+                }
+            ],
             order: { created_at: 'DESC' },
             take: items_per_page,
             skip: skip,
             relations: {
-                user: true
+                user: true,
+                category: true,
             },
             select: {
                 user: {
@@ -46,6 +54,10 @@ export class PostService {
                     last_name: true,
                     email: true,
                     avatar: true,
+                },
+                category: {
+                    id: true,
+                    name: true,
                 },
             }
         })
@@ -68,7 +80,7 @@ export class PostService {
         return await this.postRepository.findOne(
             {
                 where: { id: id },
-                relations: { user: true },
+                relations: { user: true, category: true },
                 select: {
                     user: {
                         id: true,
@@ -76,6 +88,10 @@ export class PostService {
                         last_name: true,
                         email: true,
                         avatar: true,
+                    },
+                    category: {
+                        id: true,
+                        name: true,
                     },
                 }
             }

@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Param, Post, Body, Put, Delete, Query, Req, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import { Controller, Get, UseGuards, Param, Post, Body, Put, Delete, Query, Req, UploadedFile, UseInterceptors, BadRequestException, ParseArrayPipe } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -41,6 +41,11 @@ export class UserController {
     @Put(':id')
     update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
         return this.userService.update(Number(id), updateUserDto);
+    }
+
+    @Delete('multiple')
+    multipleDelete(@Query('ids', new ParseArrayPipe({ items: String, separator: ',' })) ids: string[]) {
+        return this.userService.multipleDelete(ids);
     }
 
     @UseGuards(AuthGuard)
