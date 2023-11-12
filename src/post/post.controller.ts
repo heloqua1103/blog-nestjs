@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Req, SetMetadata, UploadedFile, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageConfig } from 'helpers/config';
@@ -12,7 +12,8 @@ import { UpdatePostDto } from './dto/update-post';
 @Controller('post')
 export class PostController {
     constructor(private postService: PostService) { }
-    @UseGuards(AuthGuard)
+
+    @SetMetadata('roles', ['admin'])
     @UsePipes(ValidationPipe)
     @Post()
     @UseInterceptors(FileInterceptor('thumbnail', {
@@ -43,19 +44,16 @@ export class PostController {
         return this.postService.create(req['user_data'].id, { ...createPostDto, thumbnail: file.destination + '/' + file.filename });
     }
 
-    @UseGuards(AuthGuard)
     @Get()
     findAll(@Query() query: FilterPostDto): Promise<any> {
         return this.postService.findAll(query);
     }
 
-    @UseGuards(AuthGuard)
     @Get(':id')
     findDetail(@Param('id') id: string): Promise<PostEntity> {
         return this.postService.findDetail(Number(id));
     }
 
-    @UseGuards(AuthGuard)
     @Put(':id')
     @UseInterceptors(FileInterceptor('thumbnail', {
         storage: storageConfig('post'), fileFilter: (req, file, cb) => {
@@ -85,7 +83,6 @@ export class PostController {
         return this.postService.update(Number(id), updatePostDto);
     }
 
-    @UseGuards(AuthGuard)
     @Delete(':id')
     delete(@Param('id') id: string) {
         return this.postService.delete(Number(id));

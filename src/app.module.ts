@@ -8,6 +8,10 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { PostModule } from './post/post.module';
 import { CategoryModule } from './category/category.module';
+import { RolesGuard } from './auth/roles.guard';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth/auth.guard';
+import { User } from './user/entities/user.entity';
 @Module({
   imports: [
     TypeOrmModule.forRoot(dataSourceOptions),
@@ -15,9 +19,20 @@ import { CategoryModule } from './category/category.module';
     AuthModule,
     ConfigModule.forRoot(),
     PostModule,
-    CategoryModule
+    CategoryModule,
+    TypeOrmModule.forFeature([User])
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard
+    }
+  ],
 })
 export class AppModule { }

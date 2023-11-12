@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Param, Post, Body, Put, Delete, Query, Req, UploadedFile, UseInterceptors, BadRequestException, ParseArrayPipe } from '@nestjs/common';
+import { Controller, Get, UseGuards, Param, Post, Body, Put, Delete, Query, Req, UploadedFile, UseInterceptors, BadRequestException, ParseArrayPipe, SetMetadata } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -10,13 +10,14 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageConfig } from 'helpers/config';
 import { extname } from 'path';
+import { Roles } from 'src/auth/decorator/roles.decorator';
 @ApiTags('User')
 @ApiBearerAuth()
 @Controller('user')
 export class UserController {
     constructor(private userService: UserService) { }
 
-    @UseGuards(AuthGuard)
+    @Roles('admin')
     @ApiQuery({ name: 'page' })
     @ApiQuery({ name: 'items_per_page' })
     @ApiQuery({ name: 'search' })
@@ -25,19 +26,16 @@ export class UserController {
         return this.userService.findAll(query);
     }
 
-    @UseGuards(AuthGuard)
     @Get(':id')
     findOne(@Param('id') id: string): Promise<User> {
         return this.userService.findOne(Number(id));
     }
 
-    @UseGuards(AuthGuard)
     @Post()
     create(@Body() createUserDto: CreateUserDto): Promise<User> {
         return this.userService.create(createUserDto);
     }
 
-    @UseGuards(AuthGuard)
     @Put(':id')
     update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
         return this.userService.update(Number(id), updateUserDto);
@@ -48,13 +46,11 @@ export class UserController {
         return this.userService.multipleDelete(ids);
     }
 
-    @UseGuards(AuthGuard)
     @Delete(':id')
     delete(@Param('id') id: string) {
         return this.userService.delete(Number(id));
     }
 
-    @UseGuards(AuthGuard)
     @Post('upload-avatar')
     @UseInterceptors(FileInterceptor('avatar', {
         storage: storageConfig('avatar'), fileFilter: (req, file, cb) => {
